@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Geoterra — Sistema de Cotización</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Nunito:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- LOGIN SCREEN -->
+  <div id="screen-login" class="screen active">
+    <div class="login-bg">
+      <div class="grid-overlay"></div>
+      <div class="login-card">
+        <div class="logo-wrap">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <polygon points="24,4 44,36 4,36" stroke="#D4A843" stroke-width="2" fill="none"/>
+            <line x1="24" y1="4" x2="24" y2="36" stroke="#D4A843" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="4" y1="36" x2="44" y2="36" stroke="#D4A843" stroke-width="1"/>
+            <circle cx="24" cy="36" r="3" fill="#D4A843"/>
+          </svg>
+          <span class="logo-text">Geoterra</span>
+        </div>
+        <p class="login-subtitle">Sistema de Cotización Topográfica</p>
+        <div class="form-group">
+          <label class="field-label">Usuario</label>
+          <input id="inp-user" type="text" class="field" placeholder="admin" autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label class="field-label">Contraseña</label>
+          <input id="inp-pass" type="password" class="field" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+        <div id="login-error" class="error-msg hidden">Credenciales incorrectas</div>
+        <button class="btn-primary" onclick="doLogin()">Ingresar</button>
+        <p class="login-hint">Usuario: <code>admin</code> &nbsp;|&nbsp; Contraseña: <code>geo2024</code></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="screen-app" class="screen">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <svg width="28" height="28" viewBox="0 0 48 48" fill="none">
+          <polygon points="24,4 44,36 4,36" stroke="#D4A843" stroke-width="2.5" fill="none"/>
+          <line x1="24" y1="4" x2="24" y2="36" stroke="#D4A843" stroke-width="1.5" stroke-dasharray="3,3"/>
+          <circle cx="24" cy="36" r="3" fill="#D4A843"/>
+        </svg>
+        <span>Geoterra</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" onclick="showSection('nueva',this)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>
+          Nueva Cotización
+        </a>
+        <a href="#" class="nav-item" onclick="showSection('historial',this)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+          Historial
+        </a>
+        <a href="#" class="nav-item" onclick="showSection('tarifas',this)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9 9h1a2 2 0 0 1 0 4H9m3 4H9"/><line x1="12" y1="6" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="18"/></svg>
+          Tarifas Base
+        </a>
+      </nav>
+      <button class="btn-logout" onclick="doLogout()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        Cerrar sesión
+      </button>
+    </aside>
+
+    <!-- Header móvil (solo visible en celular) -->
+    <header class="mobile-header">
+      <div class="mobile-logo">
+        <svg width="22" height="22" viewBox="0 0 48 48" fill="none">
+          <polygon points="24,4 44,36 4,36" stroke="#D4A843" stroke-width="2.5" fill="none"/>
+          <line x1="24" y1="4" x2="24" y2="36" stroke="#D4A843" stroke-width="1.5" stroke-dasharray="3,3"/>
+          <circle cx="24" cy="36" r="3" fill="#D4A843"/>
+        </svg>
+        Geoterra
+      </div>
+      <span class="mobile-quote-id" id="mobile-quote-number">COT-001</span>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- NUEVA COTIZACIÓN -->
+      <section id="sec-nueva" class="content-section active">
+        <div class="section-header">
+          <h1>Nueva Cotización</h1>
+          <span class="quote-id" id="quote-number">COT-001</span>
+        </div>
+
+        <div class="form-grid">
+          <!-- Cliente -->
+          <div class="card">
+            <div class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4A843" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Datos del Cliente
+            </div>
+            <div class="two-col">
+              <div class="form-group">
+                <label class="field-label">Nombre completo *</label>
+                <input id="c-nombre" type="text" class="field" placeholder="Ej. Juan Pérez García" />
+              </div>
+              <div class="form-group">
+                <label class="field-label">Teléfono</label>
+                <input id="c-tel" type="tel" class="field" placeholder="Ej. 773 123 4567" />
+              </div>
+              <div class="form-group">
+                <label class="field-label">Correo electrónico</label>
+                <input id="c-email" type="email" class="field" placeholder="correo@ejemplo.com" />
+              </div>
+              <div class="form-group">
+                <label class="field-label">RFC / CURP (opcional)</label>
+                <input id="c-rfc" type="text" class="field" placeholder="Para factura oficial" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Servicio -->
+          <div class="card">
+            <div class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4A843" stroke-width="2"><polygon points="3,6 12,3 21,6 12,9"/><path d="M3 6v12l9 3 9-3V6"/></svg>
+              Tipo de Servicio
+            </div>
+            <div class="form-group">
+              <label class="field-label">Servicio *</label>
+              <select id="s-tipo" class="field" onchange="updateCalc()">
+                <option value="">— Seleccionar servicio —</option>
+                <option value="deslinde">Deslinde de terreno</option>
+                <option value="levantamiento">Levantamiento topográfico</option>
+                <option value="plano">Elaboración de plano</option>
+                <option value="plano_catastral">Plano catastral / municipal</option>
+                <option value="trazo">Trazo y nivelación</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="field-label">Descripción del predio</label>
+              <input id="s-desc" type="text" class="field" placeholder="Ej. Terreno ejidal en Col. La Esperanza" />
+            </div>
+            <div class="form-group">
+              <label class="field-label">Ubicación / Municipio</label>
+              <input id="s-ubic" type="text" class="field" placeholder="Ej. Martínez de la Torre, Ver." />
+            </div>
+          </div>
+
+          <!-- Parámetros de terreno -->
+          <div class="card">
+            <div class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4A843" stroke-width="2"><path d="M3 17l4-8 4 4 4-6 4 10"/><line x1="3" y1="21" x2="21" y2="21"/></svg>
+              Parámetros del Terreno
+            </div>
+            <div class="two-col">
+              <div class="form-group">
+                <label class="field-label">Superficie (hectáreas) *</label>
+                <input id="p-sup" type="number" class="field" min="0.01" step="0.01" placeholder="0.00" oninput="updateCalc()" />
+              </div>
+              <div class="form-group">
+                <label class="field-label">Distancia desde oficina (km)</label>
+                <input id="p-dist" type="number" class="field" min="0" step="1" value="0" placeholder="0" oninput="updateCalc()" />
+              </div>
+              <div class="form-group">
+                <label class="field-label">Topografía del terreno *</label>
+                <select id="p-topo" class="field" onchange="updateCalc()">
+                  <option value="plano">Plano / Regular</option>
+                  <option value="ondulado">Ondulado / Semiplano</option>
+                  <option value="lomerio">Lomerío</option>
+                  <option value="montanoso">Montañoso / Accidentado</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="field-label">Condición del terreno</label>
+                <select id="p-cond" class="field" onchange="updateCalc()">
+                  <option value="medido">Terreno medido / Con datos</option>
+                  <option value="sin_datos">Sin datos previos</option>
+                  <option value="conflicto">Con conflicto de linderos</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="field-label">Número de vértices / linderos</label>
+                <input id="p-vert" type="number" class="field" min="1" step="1" value="4" oninput="updateCalc()" />
+              </div>
+              <div class="form-group">
+                <label class="field-label">Urgencia</label>
+                <select id="p-urg" class="field" onchange="updateCalc()">
+                  <option value="normal">Normal</option>
+                  <option value="urgente">Urgente — 48h</option>
+                  <option value="express">Express — 24h</option>
+                </select>
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1">
+                <label class="field-label">Equipo topográfico</label>
+                <select id="p-equipo" class="field" onchange="updateCalc()">
+                  <option value="cinta">Cinta, plomada y brújula</option>
+                  <option value="nivel">Nivel fijo</option>
+                  <option value="estacion_total">Estación total</option>
+                  <option value="gnss_rtk">Estación GNSS RTK</option>
+                  <option value="dron_gnss">Dron GNSS RTK</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Resumen -->
+          <div class="card card-highlight">
+            <div class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4A843" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+              Resumen de Cotización
+            </div>
+            <div class="breakdown" id="breakdown">
+              <div class="breakdown-row">
+                <span>Precio base del servicio</span>
+                <span id="b-base">$0.00</span>
+              </div>
+              <div class="breakdown-row">
+                <span id="lbl-topo">Ajuste por topografía</span>
+                <span id="b-topo">$0.00</span>
+              </div>
+              <div class="breakdown-row">
+                <span id="lbl-cond">Ajuste por condición</span>
+                <span id="b-cond">$0.00</span>
+              </div>
+              <div class="breakdown-row">
+                <span>Recargo por distancia</span>
+                <span id="b-dist">$0.00</span>
+              </div>
+              <div class="breakdown-row">
+                <span id="lbl-urg">Recargo por urgencia</span>
+                <span id="b-urg">$0.00</span>
+              </div>
+              <div class="breakdown-row">
+                <span>Recargo por vértices adicionales</span>
+                <span id="b-vert">$0.00</span>
+              </div>
+              <div class="breakdown-row">
+                <span id="lbl-equipo">Equipo topográfico</span>
+                <span id="b-equipo">$0.00</span>
+              </div>
+              <div class="breakdown-divider"></div>
+              <div class="breakdown-row subtotal">
+                <span>Subtotal</span>
+                <span id="b-sub">$0.00</span>
+              </div>
+              <div class="breakdown-row">
+                <span id="lbl-iva">IVA (16%)</span>
+                <span id="b-iva">$0.00</span>
+              </div>
+              <div class="breakdown-row total">
+                <span>TOTAL</span>
+                <span id="b-total">$0.00</span>
+              </div>
+            </div>
+            <div class="form-group" style="margin-top:1rem">
+              <label class="field-label">Notas adicionales</label>
+              <textarea id="q-notas" class="field" rows="3" placeholder="Observaciones, condiciones especiales, forma de pago..."></textarea>
+            </div>
+            <div class="btn-row">
+              <button class="btn-secondary" onclick="resetForm()">Limpiar</button>
+              <button class="btn-primary" onclick="guardarCotizacion()">Guardar Cotización</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- HISTORIAL -->
+      <section id="sec-historial" class="content-section">
+        <div class="section-header">
+          <h1>Historial de Cotizaciones</h1>
+          <div class="search-wrap">
+            <input id="search-hist" type="text" class="field" placeholder="Buscar por cliente o ID..." oninput="filtrarHistorial()" style="width:240px" />
+          </div>
+        </div>
+        <div id="historial-empty" class="empty-state">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+          <p>Aún no hay cotizaciones guardadas</p>
+        </div>
+        <div id="historial-table-wrap" class="hidden">
+          <table class="data-table" id="historial-table">
+            <thead>
+              <tr>
+                <th>ID</th><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Total</th><th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="historial-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TARIFAS -->
+      <section id="sec-tarifas" class="content-section">
+        <div class="section-header">
+          <h1>Tarifas Base</h1>
+          <button class="btn-primary" onclick="guardarTarifas()">Guardar cambios</button>
+        </div>
+
+        <!-- Precios base -->
+        <div class="card" style="margin-bottom:1.25rem">
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4A843" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            Precios base por servicio (en MXN)
+          </div>
+          <p class="hint-text">Estos valores son el precio mínimo por servicio, sobre el cual se aplican los porcentajes de ajuste según la complejidad del terreno.</p>
+          <div class="tariff-grid" id="tariff-grid"></div>
+          <div class="breakdown-divider" style="margin:1.5rem 0"></div>
+          <div class="card-title" style="margin-bottom:1rem">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4A843" stroke-width="2"><path d="M3 17l4-8 4 4 4-6 4 10"/></svg>
+            Recargos por distancia y vértices
+          </div>
+          <div class="two-col">
+            <div class="form-group">
+              <label class="field-label">Costo por km de distancia (MXN)</label>
+              <input id="t-km" type="number" class="field" min="0" step="5" />
+            </div>
+            <div class="form-group">
+              <label class="field-label">Costo por vértice adicional (más de 4)</label>
+              <input id="t-vert" type="number" class="field" min="0" step="10" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Porcentajes de ajuste -->
+        <div class="card" style="margin-bottom:1.25rem">
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4A843" stroke-width="2"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+            Porcentajes de ajuste por topografía (%)
+          </div>
+          <p class="hint-text">Porcentaje adicional sobre el precio base según el tipo de terreno.</p>
+          <div class="tariff-grid">
+            <div class="tariff-item">
+              <label>Plano / Regular</label>
+              <input id="pct-topo-plano" type="number" class="field" min="0" max="500" step="1" />
+            </div>
+            <div class="tariff-item">
+              <label>Ondulado / Semiplano</label>
+              <input id="pct-topo-ondulado" type="number" class="field" min="0" max="500" step="1" />
+            </div>
+            <div class="tariff-item">
+              <label>Lomerío</label>
+              <input id="pct-topo-lomerio" type="number" class="field" min="0" max="500" step="1" />
+            </div>
+            <div class="tariff-item">
+              <label>Montañoso / Accidentado</label>
+              <input id="pct-topo-montanoso" type="number" class="field" min="0" max="500" step="1" />
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:1.25rem">
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4A843" stroke-width="2"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+            Porcentajes de ajuste por condición del terreno (%)
+          </div>
+          <p class="hint-text">Porcentaje adicional sobre el precio base según la condición del terreno.</p>
+          <div class="tariff-grid">
+            <div class="tariff-item">
+              <label>Terreno medido / Con datos</label>
+              <input id="pct-cond-medido" type="number" class="field" min="0" max="500" step="1" />
+            </div>
+            <div class="tariff-item">
+              <label>Sin datos previos</label>
+              <input id="pct-cond-sin_datos" type="number" class="field" min="0" max="500" step="1" />
+            </div>
+            <div class="tariff-item">
+              <label>Con conflicto de linderos</label>
+              <input id="pct-cond-conflicto" type="number" class="field" min="0" max="500" step="1" />
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:1.25rem">
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4A843" stroke-width="2"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+            Porcentajes de ajuste por urgencia (%)
+          </div>
+          <p class="hint-text">Porcentaje adicional sobre el precio base según el tiempo de entrega requerido.</p>
+          <div class="tariff-grid">
+            <div class="tariff-item">
+              <label>Normal</label>
+              <input id="pct-urg-normal" type="number" class="field" min="0" max="500" step="1" />
+            </div>
+            <div class="tariff-item">
+              <label>Urgente — 48h</label>
+              <input id="pct-urg-urgente" type="number" class="field" min="0" max="500" step="1" />
+            </div>
+            <div class="tariff-item">
+              <label>Express — 24h</label>
+              <input id="pct-urg-express" type="number" class="field" min="0" max="500" step="1" />
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4A843" stroke-width="2"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+            IVA (%)
+          </div>
+          <p class="hint-text">Porcentaje de IVA que se aplica sobre el subtotal de la cotización.</p>
+          <div style="max-width:220px">
+            <div class="form-group">
+              <label class="field-label">IVA (%)</label>
+              <input id="t-iva" type="number" class="field" min="0" max="100" step="1" />
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:1.25rem">
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4A843" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07M8.46 8.46a5 5 0 0 0 0 7.07"/></svg>
+            Recargos por equipo topográfico (%)
+          </div>
+          <p class="hint-text">Porcentaje adicional sobre el precio base según el equipo utilizado. Los equipos más precisos o especializados pueden tener un recargo mayor.</p>
+          <div class="tariff-grid">
+            <div class="tariff-item">
+              <label>Cinta, plomada y brújula</label>
+              <input id="pct-equipo-cinta" type="number" class="field" min="0" max="500" step="1" />
+            </div>
+            <div class="tariff-item">
+              <label>Nivel fijo</label>
+              <input id="pct-equipo-nivel" type="number" class="field" min="0" max="500" step="1" />
+            </div>
+            <div class="tariff-item">
+              <label>Estación total</label>
+              <input id="pct-equipo-estacion_total" type="number" class="field" min="0" max="500" step="1" />
+            </div>
+            <div class="tariff-item">
+              <label>Estación GNSS RTK</label>
+              <input id="pct-equipo-gnss_rtk" type="number" class="field" min="0" max="500" step="1" />
+            </div>
+            <div class="tariff-item">
+              <label>Dron GNSS RTK</label>
+              <input id="pct-equipo-dron_gnss" type="number" class="field" min="0" max="500" step="1" />
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- BOTTOM NAV (móvil) — dentro de screen-app para que solo aparezca tras el login -->
+    <nav class="bottom-nav">
+      <div class="bottom-nav-inner">
+        <button class="bn-item active" id="bn-nueva" onclick="showSection('nueva', this); syncBottomNav('nueva')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>
+          Nueva
+        </button>
+        <button class="bn-item" id="bn-historial" onclick="showSection('historial', null); syncBottomNav('historial')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+          Historial
+        </button>
+        <button class="bn-item" id="bn-tarifas" onclick="showSection('tarifas', null); syncBottomNav('tarifas')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9 9h1a2 2 0 0 1 0 4H9m3 4H9"/><line x1="12" y1="6" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="18"/></svg>
+          Tarifas
+        </button>
+        <button class="bn-item bn-logout" onclick="doLogout()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          Salir
+        </button>
+      </div>
+    </nav>
+
+  </div>
+
+  <!-- MODAL DETALLE COTIZACIÓN -->
+  <div id="modal-overlay" class="modal-overlay hidden" onclick="closeModal(event)">
+    <div class="modal-box" id="modal-box">
+      <div class="modal-header">
+        <span id="modal-title">Cotización</span>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div id="modal-content"></div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="exportPDF()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+          Exportar PDF
+        </button>
+        <button class="btn-secondary" onclick="exportExcel()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+          Exportar Excel
+        </button>
+        <button class="btn-primary" onclick="generarFactura()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+          Generar Factura
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
